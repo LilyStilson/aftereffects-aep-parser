@@ -201,11 +201,11 @@ func parseItem(itemHead *rifx.List, project *Project) (*Item, error) {
             Height                  uint16        // Offset 138B    //  07 80 [04 38]
             Unknown04               [12]byte      // Offset 140B    //  Empty bytes
             Framerate               uint16        // Offset 152B    //  [00 3C]
-            Unknown05               [7]byte       // Offset         //  00 08 34 
+            Unknown05               [6]byte       // Offset         //  00 08 34 
 
             /// This doesn't looks like a typical framedata, but still close enough
             //Offset6_0             uint16         // Offset        //  [00 00] 00 08 34 00 00
-            StartOffset             uint24         // Offset        //  00 00 [00 08 34] 00 00
+            StartOffset             uint32         // Offset        //  00 00 [00 08 34] 00 00
             Offset6_1               uint16         // Offset        //  00 00 00 08 34 [00 00] 
 
             /// There is two bytes at the end of [StartOffset] that is used for
@@ -225,16 +225,17 @@ func parseItem(itemHead *rifx.List, project *Project) (*Item, error) {
         item.FootageFramerate = float64(compDesc.Framerate);
         
         if (compDesc.ComparisonFramerate != compDesc.Framerate) {
-            compDesc.StartOffset.Set(uint32(compDesc.StartOffset.ToUint32() / 2))
+            //compDesc.StartOffset.Set(uint32(compDesc.StartOffset.ToUint32() / 2))
+            compDesc.StartOffset = uint32(compDesc.StartOffset / 2)
         }
 
         if ((compDesc.EndFrame[0] > 0x13 && compDesc.EndFrame[1] > 0xC6 && compDesc.EndFrame[2] > 0x80) || 
             compDesc.EndFrame.ToUint32() > 0x0013C680 || compDesc.Offset4_1[0] > 0x00) {    // hardcoded max comp length
-            item.Frames = [2]float64{ float64((compDesc.StartOffset.ToUint32() + compDesc.StartFrame.ToUint32()) / 2), 
-                float64((compDesc.StartOffset.ToUint32() + compDesc.CompDuration.ToUint32()) / 2) }
+            item.Frames = [2]float64{ float64((compDesc.StartOffset/*.ToUint32()*/ + compDesc.StartFrame.ToUint32()) / 2), 
+                float64((compDesc.StartOffset/*.ToUint32()*/ + compDesc.CompDuration.ToUint32()) / 2) }
         } else {
-            item.Frames = [2]float64{ float64((compDesc.StartOffset.ToUint32() + compDesc.StartFrame.ToUint32()) / 2),
-                float64((compDesc.StartOffset.ToUint32() + compDesc.EndFrame.ToUint32()) / 2) }
+            item.Frames = [2]float64{ float64((compDesc.StartOffset/*.ToUint32()*/ + compDesc.StartFrame.ToUint32()) / 2),
+                float64((compDesc.StartOffset/*.ToUint32()*/ + compDesc.EndFrame.ToUint32()) / 2) }
         }
         
         item.FootageSeconds = float64(compDesc.CompDuration.ToUint32() / 2)
