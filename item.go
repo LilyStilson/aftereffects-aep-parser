@@ -54,17 +54,17 @@ const (
 
 // Item is a generalized object storing information about folders, compositions, or footage
 type Item struct {
-    Name              string
-    ID                uint32
-    ItemType          ItemTypeName
-    FolderContents    []*Item
-    FootageDimensions [2]uint16
-    FootageFramerate  float64
-    FootageSeconds    float64
+    Name                string
+    ID                  uint32
+    ItemType            ItemTypeName
+    FolderContents      []*Item
+    FootageDimensions   [2]uint16
+    FootageFramerate    float64
+    FootageSeconds      float64
     Frames              [2]float64        // Will contain start and end frame
-    FootageType       FootageTypeName
-    BackgroundColor   [3]byte
-    CompositionLayers []*Layer
+    FootageType         FootageTypeName
+    BackgroundColor     [3]byte
+    CompositionLayers   []*Layer
 }
 
 func parseItem(itemHead *rifx.List, project *Project) (*Item, error) {
