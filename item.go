@@ -157,15 +157,15 @@ func parseItem(itemHead *rifx.List, project *Project) (*Item, error) {
         }
     case ItemTypeComposition:
         type CDTA struct {
-            Unknown00               [10]byte    // Offset 0B    // Start parsing, skip 10 bytes
             // CDTA OFFSET 10 BYTES
             // 63 64 74 61 00 00 00 CC |
-            
-            /*FramerateDivisor      uint32      // Offset 4B    
-            FramerateDividend       uint32      // Offset 8B
-            Unknown01               [32]byte    // Offset 12B
-            SecondsDividend         uint32      // Offset 40B
-            SecondsDivisor          uint32      // Offset 44B*/    
+            Unknown00               [4]byte     // Offset 0B    // Start parsing, skip 10 bytes
+        
+            FramerateDivisor        uint32      // Offset 4B        //  00 00 03 E8  
+            FramerateDividend       uint32      // Offset 8B        //  00 00 5D A8
+            Unknown01               [6]byte         // Offset 12B
+            /*SecondsDividend         uint32      // Offset 40B
+            SecondsDivisor          uint32        // Offset 44B*/    
 
             //  AE contains frame data in a [3]byte
             //  but we don't have uint24 type by default in go
@@ -174,9 +174,9 @@ func parseItem(itemHead *rifx.List, project *Project) (*Item, error) {
             
             /// The hell is this actually? 
             /// Seems there is an empty frame struct in the beginning of the comp    
-            Offset1_0               uint16        // Offset         //  [78 00] 00 00 00 00 00 00
-            Unknown01               uint24        // Offset         //  78 00 [00 00 00] 00 00 00
-            Offset1_1               [3]byte       // Offset         //  78 00 00 00 00 [00 00 00]
+            /*Offset1_0               uint16        // Offset         //  [78 00] 00 00 00 00 00 00
+            Unknown02               uint24        // Offset         //  78 00 [00 00 00] 00 00 00
+            Offset1_1               [3]byte       // Offset         //  78 00 00 00 00 [00 00 00]*/
             
             Offset2_0               uint16        // Offset         //  [02 58] 00 09 60 00 00 00
             PlayheadPosition        uint24        // Offset         //  02 58 [00 09 60] 00 00 00
@@ -196,12 +196,12 @@ func parseItem(itemHead *rifx.List, project *Project) (*Item, error) {
 
             Offset04                uint16        // Offset 46B     //  [78 00] FF FF FF            
             BackgroundColor         [3]byte       // Offset 48B     //  78 00 [FF FF FF]
-            Unknown03               [85]byte      // Offset 51B     //  Empty bytes
+            Unknown04               [85]byte      // Offset 51B     //  Empty bytes
             Width                   uint16        // Offset 136B    //  [07 80] 04 38
             Height                  uint16        // Offset 138B    //  07 80 [04 38]
-            Unknown04               [12]byte      // Offset 140B    //  Empty bytes
+            Unknown05               [12]byte      // Offset 140B    //  Empty bytes
             Framerate               uint16        // Offset 152B    //  [00 3C]
-            Unknown05               [6]byte       // Offset         //  00 08 34 
+            Unknown06               [6]byte       // Offset         //  00 08 34 
 
             /// This doesn't looks like a typical framedata, but still close enough
             //Offset6_0             uint16         // Offset        //  [00 00] 00 08 34 00 00
@@ -220,9 +220,9 @@ func parseItem(itemHead *rifx.List, project *Project) (*Item, error) {
         }
         cdataBlock.ToStruct(compDesc)
         item.FootageDimensions = [2]uint16{compDesc.Width, compDesc.Height}
-        //item.FootageFramerate = float64(compDesc.FramerateDividend) / float64(compDesc.FramerateDivisor)
+        item.FootageFramerate = float64(compDesc.FramerateDividend) / float64(compDesc.FramerateDivisor)
         //item.FootageSeconds = float64(compDesc.SecondsDividend) / float64(compDesc.SecondsDivisor)
-        item.FootageFramerate = float64(compDesc.Framerate);
+        //item.FootageFramerate = float64(compDesc.Framerate);
         
         if (compDesc.ComparisonFramerate != compDesc.Framerate) {
             //compDesc.StartOffset.Set(uint32(compDesc.StartOffset.ToUint32() / 2))
